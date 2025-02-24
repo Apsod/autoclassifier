@@ -101,12 +101,13 @@ class Runner(object):
         self.update(labeled) # Update model
         train_stats = self.learner.stats()
 
-        test_stats = self.learner.stats([Labeled(i,l) for i, t, r, l in self.test_samples])
 
         stats = {}
         stats.update({f'train/{k}': v for k, v in train_stats.items()})
         stats.update({f'step/{k}': v for k, v in step_stats.items()})
-        stats.update({f'test/{k}': v for k, v in test_stats.items()})
+        if self.test_samples:
+            test_stats = self.learner.stats([Labeled(i,l) for i, t, r, l in self.test_samples])
+            stats.update({f'test/{k}': v for k, v in test_stats.items()})
         stats['cross_val/score'] = self.learner.cross_val_score()
         stats['data/positive_ratio'] = (self.learner.measure() > 0).mean().item()
         self.display.advance_step()
